@@ -5,7 +5,8 @@
   libGL, spice-protocol, zlib, libGLU, dbus, libunwind, libdrm,
   mesa, udev, bootstrap_cmds, bison, flex, clangStdenv, autoreconfHook,
   mcpp, epoxy, openssl, pkgconfig, llvm_6,
-  cf-private, ApplicationServices, Carbon, Cocoa, Xplugin
+  cf-private, ApplicationServices, Carbon, Cocoa, Xplugin,
+  nettle
 }:
 
 let
@@ -504,28 +505,28 @@ self: super:
       if (!isDarwin)
       then {
         outputs = [ "out" "dev" ];
-        buildInputs = commonBuildInputs ++ [ libdrm mesa ];
+        buildInputs = commonBuildInputs ++ [ libdrm mesa nettle ]
+          ++ (with self; [ libXmu libXext libX11 libXrender libXfixes libXi libdmx libXau libXdmcp libXtst ]);
+        nativeBuildInputs = attrs.nativeBuildInputs ++ (with self; [ fontutil utilmacros ])
+          ++ [ meson ninja bison flex ];
         propagatedBuildInputs = [ libpciaccess epoxy ] ++ commonPropagatedBuildInputs ++ lib.optionals stdenv.isLinux [
           udev
         ];
-        prePatch = stdenv.lib.optionalString stdenv.hostPlatform.isMusl ''
-          export CFLAGS+=" -D__uid_t=uid_t -D__gid_t=gid_t"
-        '';
-        configureFlags = [
-          "--enable-kdrive"             # not built by default
-          "--enable-xephyr"
-          "--enable-xcsecurity"         # enable SECURITY extension
-          "--with-default-font-path="   # there were only paths containing "${prefix}",
-                                        # and there are no fonts in this package anyway
-          "--with-xkb-bin-directory=${self.xkbcomp}/bin"
-          "--with-xkb-path=${self.xkeyboardconfig}/share/X11/xkb"
-          "--with-xkb-output=$out/share/X11/xkb/compiled"
-          "--enable-glamor"
-        ] ++ lib.optionals stdenv.hostPlatform.isMusl [
-          "--disable-tls"
+
+        mesonFlags = [
+          "-Ddmx=true"
+          "-Dxcsecurity=true"     # enable SECURITY extension
+          "-Dxephyr=true"
+
+          "-Ddefault_font_path="  # there were only paths containing "${prefix}",
+                                  # and there are no fonts in this package anyway
+          "-Dxkb_dir=${self.xkeyboardconfig}/share/X11/xkb"
+          "-Dxkb_bin_dir=${self.xkbcomp}/bin"
+          "-Dxkb_output_dir=${placeholder "out"}/share/X11/xkb/compiled"
         ];
 
         postInstall = ''
+          ln -s $out/bin/Xorg $out/bin/X
           rm -fr $out/share/X11/xkb/compiled # otherwise X will try to write in it
           ( # assert() keeps runtime reference xorgserver-dev in xf86-video-intel and others
             cd "$dev"
