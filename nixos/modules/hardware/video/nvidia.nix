@@ -34,7 +34,8 @@ let
   enabled = nvidia_x11 != null;
 
   cfg = config.hardware.nvidia;
-  syncCfg = cfg.prime.sync;
+  pCfg = cfg.prime;
+  syncCfg = pCfg.sync;
 in
 
 {
@@ -52,6 +53,26 @@ in
       '';
     };
 
+    hardware.nvidia.prime.nvidiaBusId = mkOption {
+      type = types.str;
+      default = "";
+      example = "PCI:1:0:0";
+      description = ''
+        Bus ID of the NVIDIA GPU. You can find it using lspci; for example if lspci
+        shows the NVIDIA GPU at "01:00.0", set this option to "PCI:1:0:0".
+      '';
+    };
+
+    hardware.nvidia.prime.intelBusId = mkOption {
+      type = types.str;
+      default = "";
+      example = "PCI:0:2:0";
+      description = ''
+        Bus ID of the Intel GPU. You can find it using lspci; for example if lspci
+        shows the Intel GPU at "00:02.0", set this option to "PCI:0:2:0".
+      '';
+    };
+
     hardware.nvidia.prime.sync.enable = mkOption {
       type = types.bool;
       default = false;
@@ -66,8 +87,8 @@ in
         be the only driver there.
 
         If this is enabled, then the bus IDs of the NVIDIA and Intel GPUs have to be
-        specified (<option>hardware.nvidia.prime.sync.nvidiaBusId</option> and
-        <option>hardware.nvidia.prime.sync.intelBusId</option>).
+        specified (<option>hardware.nvidia.prime.nvidiaBusId</option> and
+        <option>hardware.nvidia.prime.intelBusId</option>).
 
         If you enable this, you may want to also enable kernel modesetting for the
         NVIDIA driver (<option>hardware.nvidia.modesetting.enable</option>) in order
@@ -86,26 +107,6 @@ in
         Configure X to allow external NVIDIA GPUs when using optimus.
       '';
     };
-
-    hardware.nvidia.prime.sync.nvidiaBusId = mkOption {
-      type = types.str;
-      default = "";
-      example = "PCI:1:0:0";
-      description = ''
-        Bus ID of the NVIDIA GPU. You can find it using lspci; for example if lspci
-        shows the NVIDIA GPU at "01:00.0", set this option to "PCI:1:0:0".
-      '';
-    };
-
-    hardware.nvidia.prime.sync.intelBusId = mkOption {
-      type = types.str;
-      default = "";
-      example = "PCI:0:2:0";
-      description = ''
-        Bus ID of the Intel GPU. You can find it using lspci; for example if lspci
-        shows the Intel GPU at "00:02.0", set this option to "PCI:0:2:0".
-      '';
-    };
   };
 
   config = mkIf enabled {
@@ -116,7 +117,7 @@ in
       }
       {
         assertion = !syncCfg.enable ||
-          (syncCfg.nvidiaBusId != "" && syncCfg.intelBusId != "");
+          (pCfg.nvidiaBusId != "" && pCfg.intelBusId != "");
         message = ''
           When NVIDIA Optimus via PRIME is enabled, the GPU bus IDs must configured.
         '';
@@ -140,7 +141,7 @@ in
       modules = [ nvidia_x11.bin ];
       deviceSection = optionalString syncCfg.enable
         ''
-          BusID "${syncCfg.nvidiaBusId}"
+          BusID "${pCfg.nvidiaBusId}"
           ${optionalString syncCfg.allowExternalGpu "Option \"AllowExternalGpus\""}
         '';
       screenSection =
@@ -155,7 +156,7 @@ in
         Section "Device"
           Identifier "nvidia-optimus-intel"
           Driver "modesetting"
-          BusID  "${syncCfg.intelBusId}"
+          BusID  "${pCfg.intelBusId}"
           Option "AccelMethod" "none"
         EndSection
       '';
