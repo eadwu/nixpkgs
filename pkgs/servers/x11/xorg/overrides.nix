@@ -524,12 +524,14 @@ self: super:
       attrs =
         if (abiCompat == null || lib.hasPrefix abiCompat version) then
           attrs_passed // {
-            buildInputs = attrs_passed.buildInputs ++ [ libdrm.dev ]; patchPhase = ''
-            for i in dri3/*.c
-            do
-              sed -i -e "s|#include <drm_fourcc.h>|#include <libdrm/drm_fourcc.h>|" $i
-            done
-          '';}
+            buildInputs = attrs_passed.buildInputs ++ [ libdrm.dev ];
+            prePatch = (attrs_passed.prePatch or "") + ''
+              for i in dri3/*.c
+              do
+                sed -i -e "s|#include <drm_fourcc.h>|#include <libdrm/drm_fourcc.h>|" $i
+              done
+            '';
+          }
         else if (abiCompat == "1.17") then {
           name = "xorg-server-1.17.4";
           builder = ./builder.sh;
@@ -583,9 +585,43 @@ self: super:
         propagatedBuildInputs = [ libpciaccess epoxy ] ++ commonPropagatedBuildInputs ++ lib.optionals stdenv.isLinux [
           udev
         ];
-        prePatch = stdenv.lib.optionalString stdenv.hostPlatform.isMusl ''
+        prePatch = (attrs.prePatch or "") + stdenv.lib.optionalString stdenv.hostPlatform.isMusl ''
           export CFLAGS+=" -D__uid_t=uid_t -D__gid_t=gid_t"
         '';
+        patches = [
+          # NVIDIA PRIME Render Offload patchset
+          # Should be upstream by 1.21
+          # http://download.nvidia.com/XFree86/Linux-x86_64/435.17/README/primerenderoffload.html
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/7f962c70b6d9c346477f23f6c15211e749110078.patch";
+            sha256 = "0qv844fj7hbwq9mvcdxra2a4g1sl45lz614w7dc7h0hvk17lgcf0";
+          })
+
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/37a36a6b5b887d5c5a17a6931ceba8ad5d1bb6d5.patch";
+            sha256 = "05zrgxwg1sgg5la2fcdnwqbd887sn0lswggx5gybb3cyhjksyzql";
+          })
+
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/8b67ec7cc6fda243480a5a8ca118b66242f3eb2c.patch";
+            sha256 = "03h2djzqwl017icxbjjnpxq2zcg14ld78jw60ajnikcy5npdrzqh";
+          })
+
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/56c0a71fdd94a008e5d746261f70a713c4767f93.patch";
+            sha256 = "1dkkscyy0kz6pal5rf7z2cvkix38j3nfpjh4d497irsh5gy06igy";
+          })
+
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/b4231d69028adc8123801a7552b40a15ea928d1b.patch";
+            sha256 = "1qfkh8rd46s6418qdfyc3bhlvwrrxij1wgg28r478hyz57cama6d";
+          })
+
+          (fetchpatch {
+            url = "https://gitlab.freedesktop.org/xorg/xserver/commit/7c3f316d07753e3b3a6d23e629ce8e944820c225.patch";
+            sha256 = "19199ynzxhx13m6rb0ni9d4rrv19d5ymvlspd35dh0yidhmipafz";
+          })
+        ];
         configureFlags = [
           "--enable-kdrive"             # not built by default
           "--enable-xephyr"
