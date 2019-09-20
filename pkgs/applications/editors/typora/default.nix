@@ -1,4 +1,7 @@
-{ stdenv, fetchurl, makeWrapper, electron_5, dpkg, gtk3, glib, gsettings-desktop-schemas, wrapGAppsHook }:
+{ stdenv, fetchurl, makeWrapper, electron_5, dpkg, gtk3, glib, gsettings-desktop-schemas, wrapGAppsHook
+, withPandoc ? false, pandoc }:
+
+with stdenv.lib;
 
 stdenv.mkDerivation rec {
   pname = "typora";
@@ -42,10 +45,11 @@ stdenv.mkDerivation rec {
     makeWrapper ${electron_5}/bin/electron $out/bin/typora \
       --add-flags $out/share/typora \
       "''${gappsWrapperArgs[@]}" \
-      --prefix LD_LIBRARY_PATH : "${stdenv.lib.makeLibraryPath [ stdenv.cc.cc ]}"
+      ${optionalString withPandoc ''--prefix PATH : "${makeBinPath [ pandoc ]}"''} \
+      --prefix LD_LIBRARY_PATH : "${makeLibraryPath [ stdenv.cc.cc ]}"
   '';
 
-  meta = with stdenv.lib; {
+  meta = {
     description = "A minimal Markdown reading & writing app";
     homepage = https://typora.io;
     license = licenses.unfree;
