@@ -15173,6 +15173,8 @@ in
 
   yubikey-personalization-gui = libsForQt5.callPackage ../tools/misc/yubikey-personalization-gui { };
 
+  ykchalresp-nfc = callPackage ../tools/misc/yubikey-personalization/ykchalresp-nfc.nix { };
+
   zchunk = callPackage ../development/libraries/zchunk { };
 
   zeitgeist = callPackage ../development/libraries/zeitgeist { };
