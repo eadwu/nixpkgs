@@ -2851,6 +2851,8 @@ in
 
   psrecord = python3Packages.callPackage ../tools/misc/psrecord {};
 
+  qtspim = qt5.callPackage ../applications/virtualization/spim { };
+
   rmapi = callPackage ../applications/misc/remarkable/rmapi { };
 
   rmview = libsForQt5.callPackage ../applications/misc/remarkable/rmview { };
