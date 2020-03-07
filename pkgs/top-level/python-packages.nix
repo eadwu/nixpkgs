@@ -3649,6 +3649,8 @@ in {
 
   fastimport = callPackage ../development/python-modules/fastimport { };
 
+  fastcore = callPackage ../development/python-modules/fastai/core.nix { };
+
   fastpair = callPackage ../development/python-modules/fastpair { };
 
   fastrlock = callPackage ../development/python-modules/fastrlock {};
