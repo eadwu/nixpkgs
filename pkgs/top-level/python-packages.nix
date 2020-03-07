@@ -3651,6 +3651,8 @@ in {
 
   fastai = callPackage ../development/python-modules/fastai { };
 
+  fastai2 = callPackage ../development/python-modules/fastai/2.nix { };
+
   fastcore = callPackage ../development/python-modules/fastai/core.nix { };
 
   fastpair = callPackage ../development/python-modules/fastpair { };
