@@ -658,6 +658,8 @@ in {
 
   eradicate = callPackage ../development/python-modules/eradicate {  };
 
+  erlport = callPackage ../development/python-modules/erlport { };
+
   face = callPackage ../development/python-modules/face { };
 
   fastparquet = callPackage ../development/python-modules/fastparquet { };
