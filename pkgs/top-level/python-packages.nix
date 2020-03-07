@@ -3653,6 +3653,8 @@ in {
 
   fastpair = callPackage ../development/python-modules/fastpair { };
 
+  fastprogress = callPackage ../development/python-modules/fastai/progress.nix { };
+
   fastrlock = callPackage ../development/python-modules/fastrlock {};
 
   feedgen = callPackage ../development/python-modules/feedgen { };
