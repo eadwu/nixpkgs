@@ -5294,6 +5294,8 @@ in
 
   nerdfonts = callPackage ../data/fonts/nerdfonts { };
 
+  nerdfonts-symbols = callPackage ../data/fonts/nerdfonts/symbols.nix { };
+
   nestopia = callPackage ../misc/emulators/nestopia { };
 
   netatalk = callPackage ../tools/filesystems/netatalk { };
