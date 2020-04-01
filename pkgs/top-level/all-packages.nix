@@ -18069,6 +18069,8 @@ in
 
   posix_man_pages = callPackage ../data/documentation/man-pages-posix { };
 
+  powerline-extra-symbols = callPackage ../data/fonts/powerline-extra-symbols { };
+
   powerline-fonts = callPackage ../data/fonts/powerline-fonts { };
 
   powerline-go = callPackage ../tools/misc/powerline-go { };
