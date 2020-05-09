@@ -18349,7 +18349,7 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
 
     inherit (callPackages ../os-specific/linux/zfs {
       configFile = "kernel";
-      inherit kernel;
+      inherit kernel autoModuleSignHook;
      }) zfsStable zfsUnstable;
 
      zfs = zfsStable;
