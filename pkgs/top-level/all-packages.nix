@@ -17610,7 +17610,7 @@ in
 
     inherit (callPackages ../os-specific/linux/zfs {
       configFile = "kernel";
-      inherit kernel;
+      inherit kernel autoModuleSignHook;
      }) zfsStable zfsUnstable;
 
      zfs = zfsStable;
