@@ -1,18 +1,19 @@
 { stdenv, fetchFromGitHub, fetchpatch
 , cmake, pkgconfig, SDL2, SDL, SDL2_ttf, openssl, spice-protocol, fontconfig
 , libX11, freefont_ttf, nettle, libconfig, wayland, libpthreadstubs, libXdmcp
-, libXfixes, libbfd
+, libXfixes, libbfd, libffi, expat, libXi
 }:
 
 stdenv.mkDerivation rec {
   pname = "looking-glass-client";
-  version = "B1";
+  version = "2020-07-17";
 
   src = fetchFromGitHub {
     owner = "gnif";
     repo = "LookingGlass";
-    rev = version;
-    sha256 = "0vykv7yjz4fima9d82m83acd8ab72nq4wyzyfs1c499i27wz91ia";
+    rev = "bd42445ea751dafe8b6ce7a49fd2169a29b07b10";
+    sha256 = "1ivnkmgrp11symdqibsf77p8qs8rwlc48g2pzyz30p886k51yg8s";
+    fetchSubmodules = true;
   };
 
   nativeBuildInputs = [ pkgconfig ];
@@ -20,7 +21,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     SDL SDL2 SDL2_ttf openssl spice-protocol fontconfig
     libX11 freefont_ttf nettle libconfig wayland libpthreadstubs
-    libXdmcp libXfixes libbfd cmake
+    libXdmcp libXfixes libbfd cmake libffi expat libXi
   ];
 
   enableParallelBuilding = true;
