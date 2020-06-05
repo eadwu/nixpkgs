@@ -77,7 +77,11 @@ assert (versionAtLeast version "4.9");
   # Disable various dangerous settings
   ACPI_CUSTOM_METHOD = no; # Allows writing directly to physical memory
   PROC_KCORE         = no; # Exposes kernel text image layout
-  INET_DIAG          = no; # Has been used for heap based attacks in the past
+  INET_DIAG          = mkForce no; # Has been used for heap based attacks in the past
+  INET_TCP_DIAG      = mkForce (option no);
+  INET_UDP_DIAG      = mkForce (option no);
+  INET_RAW_DIAG      = mkForce (option no);
+  INET_DIAG_DESTROY  = mkForce (option no);
 
   # Use -fstack-protector-strong (gcc 4.9+) for best stack canary coverage.
   CC_STACKPROTECTOR_REGULAR = whenOlder "4.18" no;
