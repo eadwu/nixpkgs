@@ -18226,6 +18226,8 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
 
     lttng-modules = callPackage ../os-specific/linux/lttng-modules { };
 
+    lkrg = callPackage ../os-specific/linux/lkrg { };
+
     broadcom_sta = callPackage ../os-specific/linux/broadcom-sta { };
 
     tbs = callPackage ../os-specific/linux/tbs { };
