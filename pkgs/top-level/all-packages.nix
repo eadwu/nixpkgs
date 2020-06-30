@@ -18224,6 +18224,8 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
 
     v4l2loopback = callPackage ../os-specific/linux/v4l2loopback { };
 
+    libevl = callPackage ../os-specific/linux/libevl { };
+
     lttng-modules = callPackage ../os-specific/linux/lttng-modules { };
 
     broadcom_sta = callPackage ../os-specific/linux/broadcom-sta { };
