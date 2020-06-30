@@ -17451,6 +17451,8 @@ in
 
     v4l2loopback = callPackage ../os-specific/linux/v4l2loopback { };
 
+    libevl = callPackage ../os-specific/linux/libevl { };
+
     lttng-modules = callPackage ../os-specific/linux/lttng-modules { };
 
     broadcom_sta = callPackage ../os-specific/linux/broadcom-sta { };
