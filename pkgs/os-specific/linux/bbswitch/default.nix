@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, fetchpatch, kernel, runtimeShell }:
+{ stdenv, fetchurl, fetchpatch, kernel, runtimeShell, autoModuleSignHook }:
 
 let
   baseName = "bbswitch";
@@ -26,7 +26,7 @@ stdenv.mkDerivation {
     })
   ];
 
-  nativeBuildInputs = kernel.moduleBuildDependencies;
+  nativeBuildInputs = kernel.moduleBuildDependencies ++ [ autoModuleSignHook ];
 
   hardeningDisable = [ "pic" ];
 
@@ -53,6 +53,8 @@ stdenv.mkDerivation {
     EOF
     chmod +x $out/bin/discrete_vga_poweroff $out/bin/discrete_vga_poweron
   '';
+
+  dontFixup = true;
 
   meta = with stdenv.lib; {
     description = "A module for powering off hybrid GPUs";
