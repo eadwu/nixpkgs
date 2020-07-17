@@ -8396,6 +8396,8 @@ in
 
   wireguard-tools = callPackage ../tools/networking/wireguard-tools { };
 
+  wireplumber =  callPackage ../applications/audio/wireplumber { };
+
   woff2 = callPackage ../development/web/woff2 { };
 
   woof = callPackage ../tools/misc/woof { };
