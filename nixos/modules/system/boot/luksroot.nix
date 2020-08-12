@@ -217,7 +217,9 @@ let
         ''}
     }
 
-    ${optionalString (luks.yubikeySupport && (yubikey != null)) ''
+    ${let
+      generateAlgoCommand = settings: "${settings.command}${optionalString settings.raw " | rbtohex"}";
+    in optionalString (luks.yubikeySupport && (yubikey != null)) ''
     # Yubikey
     rbtohex() {
         ( od -An -vtx1 | tr -d ' \n' )
@@ -242,13 +244,14 @@ let
         local new_challenge
         local new_response
         local new_k_luks
+        local keyLength="${toString yubikey.keyLength}"
 
         mount -t ${yubikey.storage.fsType} ${yubikey.storage.device} /crypt-storage || \
           die "Failed to mount Yubikey salt storage device"
 
         salt="$(cat /crypt-storage${yubikey.storage.path} | sed -n 1p | tr -d '\n')"
         iterations="$(cat /crypt-storage${yubikey.storage.path} | sed -n 2p | tr -d '\n')"
-        challenge="$(echo -n $salt | openssl-wrap dgst -binary -sha512 | rbtohex)"
+        challenge="$(echo -n $salt | ${generateAlgoCommand yubikey.algo.challenge})"
         response="$(ykchalresp -${toString yubikey.slot} -x $challenge 2>/dev/null)"
 
         for try in $(seq 3); do
@@ -259,9 +262,9 @@ let
             ''}
 
             if [ ! -z "$k_user" ]; then
-                k_luks="$(echo -n $k_user | pbkdf2-sha512 ${toString yubikey.keyLength} $iterations $response | rbtohex)"
+                k_luks="$(echo -n $k_user | ${generateAlgoCommand yubikey.algo.digest})"
             else
-                k_luks="$(echo | pbkdf2-sha512 ${toString yubikey.keyLength} $iterations $response | rbtohex)"
+                k_luks="$(echo | ${generateAlgoCommand yubikey.algo.digest})"
             fi
 
             echo -n "$k_luks" | hextorb | ${csopen} --key-file=-
@@ -290,14 +293,14 @@ let
         new_iterations="$(($new_iterations + ${toString yubikey.iterationStep}))"
         ''}
 
-        new_challenge="$(echo -n $new_salt | openssl-wrap dgst -binary -sha512 | rbtohex)"
+        new_challenge="$(echo -n $new_salt | ${generateAlgoCommand yubikey.algo.challenge})"
 
         new_response="$(ykchalresp -${toString yubikey.slot} -x $new_challenge 2>/dev/null)"
 
         if [ ! -z "$k_user" ]; then
-            new_k_luks="$(echo -n $k_user | pbkdf2-sha512 ${toString yubikey.keyLength} $new_iterations $new_response | rbtohex)"
+            new_k_luks="$(echo -n $k_user | ${generateAlgoCommand yubikey.algo.digest})"
         else
-            new_k_luks="$(echo | pbkdf2-sha512 ${toString yubikey.keyLength} $new_iterations $new_response | rbtohex)"
+            new_k_luks="$(echo | ${generateAlgoCommand yubikey.algo.digest})"
         fi
 
         echo -n "$new_k_luks" | hextorb > /crypt-ramfs/new_key
@@ -707,6 +710,64 @@ in
                   description = "Time in seconds to wait for the Yubikey.";
                 };
 
+                algo =
+                  let
+                    algoType = submodule {
+                      options = {
+                        command = mkOption {
+                          type = types.str;
+                          default = "";
+                          description = ''
+                            Command used to generate the secrets.
+                          '';
+                        };
+
+                        deps = mkOption {
+                          type = types.lines;
+                          default = "";
+                          description = ''
+                            Dependencies to insert into initrd that are needed for the algorithm.
+                          '';
+                        };
+
+                        raw = mkOption {
+                          type = types.bool;
+                          default = false;
+                          description = ''
+                            Whether or not the output from the command is outputted as raw bytes.
+                          '';
+                        };
+                      };
+                    };
+
+                    defaultDigest = {
+                      raw = true;
+                      command = "pbkdf2-sha512 $keyLength $iterations $response";
+                    };
+
+                    defaultChallenge = {
+                      raw = true;
+                      command = "openssl-wrap dgst -binary -sha512";
+                    };
+                  in
+                  {
+                    digest = mkOption {
+                      type = algoType;
+                      default = defaultDigest;
+                      description = ''
+                        Algorithm to use to generate the digest used.
+                      '';
+                    };
+
+                    challenge = mkOption {
+                      type = algoType;
+                      default = defaultChallenge;
+                      description = ''
+                        Algorithm to use to generate the challenge used.
+                      '';
+                    };
+                  };
+
                 /* TODO: Add to the documentation of the current module:
 
                    Options related to the storing the salt.
@@ -836,6 +897,11 @@ in
         cc -O3 -I${pkgs.openssl.dev}/include -L${pkgs.openssl.out}/lib ${./pbkdf2-sha512.c} -o pbkdf2-sha512 -lcrypto
         strip -s pbkdf2-sha512
         copy_bin_and_libs pbkdf2-sha512
+        ${concatMapStringsSep "\n"
+          (device: with device.yubikey.algo; digest.deps + challenge.deps)
+          (filter
+            (device: device.yubikey != null)
+            (attrValues luks.devices))}
 
         mkdir -p $out/etc/ssl
         cp -pdv ${pkgs.openssl.out}/etc/ssl/openssl.cnf $out/etc/ssl
