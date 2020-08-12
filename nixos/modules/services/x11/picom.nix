@@ -226,6 +226,14 @@ in {
       '';
     };
 
+    flags = mkOption {
+      type = with types; attrsOf (nullOr (oneOf [ bool int float str path ]));
+      default = {};
+      description = ''
+        Flags to pass to picom via the command line.
+      '';
+    };
+
     settings = with types;
     let
       scalar = oneOf [ bool int float str ]
@@ -262,6 +270,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    services.picom.flags.config = configFile;
     services.picom.settings = mkDefaultAttrs {
       # fading
       fading           = cfg.fade;
@@ -301,11 +310,18 @@ in {
         allow_rgb10_configs = "false";
       };
 
-      serviceConfig = {
-        ExecStart = "${pkgs.picom}/bin/picom --config ${configFile}";
-        RestartSec = 3;
-        Restart = "always";
-      };
+      serviceConfig =
+        let
+          flags = concatStringsSep " "
+            (mapAttrsToList
+              (flag: v: "--${flag}${optionalString (v != null) " ${toString v}"}")
+              cfg.flags);
+        in
+        {
+          ExecStart = "${pkgs.picom}/bin/picom ${flags}";
+          RestartSec = 3;
+          Restart = "always";
+        };
     };
 
     environment.systemPackages = [ pkgs.picom ];
