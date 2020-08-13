@@ -325,9 +325,9 @@ let
         new_response="$(ykchalresp -${toString dev.yubikey.slot} -x $new_challenge 2>/dev/null)"
 
         if [ ! -z "$k_user" ]; then
-            new_k_luks="$(echo -n $k_user | ${generateAlgoCommand dev.yubikey.algo.digest})"
+            response="$new_response" new_k_luks="$(echo -n $k_user | ${generateAlgoCommand dev.yubikey.algo.digest})"
         else
-            new_k_luks="$(echo | ${generateAlgoCommand dev.yubikey.algo.digest})"
+            response="$new_response" new_k_luks="$(echo | ${generateAlgoCommand dev.yubikey.algo.digest})"
         fi
 
         echo -n "$new_k_luks" | hextorb > /crypt-ramfs/new_key
