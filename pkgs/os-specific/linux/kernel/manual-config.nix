@@ -49,7 +49,8 @@ let
 
   # Dependencies that are required to build kernel modules
   moduleBuildDependencies = optional (stdenv.lib.versionAtLeast version "4.14") libelf
-    ++ extraModuleBuildDependencies;
+    # ++ extraModuleBuildDependencies
+    ;
 
   installkernel = writeTextFile { name = "installkernel"; executable=true; text = ''
     #!${stdenv.shell} -e
