@@ -11,7 +11,7 @@
 , smartmontools, sysstat, sudo
 
 # Kernel dependencies
-, kernel ? null, autoModuleSignHook ? null
+, kernel ? null
 , enablePython ? true
 }:
 
@@ -91,7 +91,7 @@ let
       '';
 
       nativeBuildInputs = [ autoreconfHook nukeReferences ]
-        ++ optionals buildKernel (kernel.moduleBuildDependencies ++ [ perl autoModuleSignHook ]);
+        ++ optionals buildKernel (kernel.moduleBuildDependencies ++ [ perl ]);
       buildInputs = optionals buildUser [ zlib libuuid attr ]
         ++ optional buildUser openssl
         ++ optional (buildUser && enablePython) python3
