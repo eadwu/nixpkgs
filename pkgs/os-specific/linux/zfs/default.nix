@@ -53,8 +53,9 @@ let
           --replace '"/usr/bin/env", "umount"' '"${utillinux}/bin/umount", "-n"' \
           --replace '"/usr/bin/env", "mount"'  '"${utillinux}/bin/mount", "-n"'
       '' + optionalString buildUser ''
-        substituteInPlace ./lib/libzfs/libzfs_mount.c --replace "/bin/umount"             "${utillinux}/bin/umount" \
-                                                      --replace "/bin/mount"              "${utillinux}/bin/mount"
+        substituteInPlace ./lib/libzfs/${optionalString isUnstable "os/linux/"}libzfs_mount${optionalString isUnstable "_os"}.c \
+          --replace "/bin/umount"         "${utillinux}/bin/umount" \
+          --replace "/bin/mount"          "${utillinux}/bin/mount"
         substituteInPlace ./lib/libshare/${optionalString isUnstable "os/linux/"}nfs.c --replace "/usr/sbin/exportfs" "${
           # We don't *need* python support, but we set it like this to minimize closure size:
           # If it's disabled by default, no need to enable it, even if we have python enabled
