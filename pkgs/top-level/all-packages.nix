@@ -21750,6 +21750,8 @@ in
 
   speedometer = callPackage ../os-specific/linux/speedometer { };
 
+  stalld = callPackage ../os-specific/linux/stalld { };
+
   statik = callPackage ../development/tools/statik { };
 
   statifier = callPackage ../os-specific/linux/statifier { };
