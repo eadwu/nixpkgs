@@ -41,13 +41,13 @@ in vscode-utils.buildVscodeMarketplaceExtension rec {
   mktplcRef = {
     name = "python";
     publisher = "ms-python";
-    version = "2020.7.96456";
+    version = "2020.8.101144";
   };
 
   vsix = fetchurl {
     name = "${mktplcRef.publisher}-${mktplcRef.name}.zip";
     url = "https://github.com/microsoft/vscode-python/releases/download/${mktplcRef.version}/ms-python-release.vsix";
-    sha256 = "0bk2wnbjcraxilzxszl00r799xf3apkfyzpy88xxv87j7787dsm8";
+    sha256 = "1ppsqs4lyxighqqia9195k2sgcv7455kzms49pmc4i3p9s3gcmny";
   };
 
   buildInputs = [

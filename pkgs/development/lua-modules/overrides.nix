@@ -347,4 +347,10 @@ with super;
       sourceRoot=./readline-2.6
     '';
   });
+
+  psl = super.psl.override({
+    externalDeps = [
+      { name = "PSL"; dep = pkgs.libpsl; }
+    ];
+  });
 }

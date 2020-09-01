@@ -4,8 +4,8 @@ with lib;
 
 let
 
-  inherit (pkgs) plymouth;
-  inherit (pkgs) nixos-icons;
+  inherit (pkgs) plymouth nixos-icons;
+  inherit (pkgs) buildEnv writeText;
 
   cfg = config.boot.plymouth;
 
@@ -16,14 +16,15 @@ let
     osVersion = config.system.nixos.release;
   };
 
-  themesEnv = pkgs.buildEnv {
+  themesEnv = buildEnv {
     name = "plymouth-themes";
-    paths = [ plymouth ] ++ cfg.themePackages;
+    paths = [ (lowPrio plymouth) ] ++ cfg.themePackages;
   };
 
-  configFile = pkgs.writeText "plymouthd.conf" ''
+  configFile = writeText "plymouthd.conf" ''
     [Daemon]
     ShowDelay=0
+    DeviceTimeout=8
     Theme=${cfg.theme}
     ${cfg.extraConfig}
   '';
@@ -43,6 +44,14 @@ in
         type = types.listOf types.package;
         description = ''
           Extra theme packages for plymouth.
+        '';
+      };
+
+      font = mkOption {
+        default = "${pkgs.dejavu_fonts.minimal}/share/fonts/truetype/DejaVuSans.ttf";
+        type = types.path;
+        description = ''
+          Splash font label
         '';
       };
 
@@ -83,7 +92,6 @@ in
 
     boot.kernelParams = [ "splash" ];
 
-    # To be discoverable by systemd.
     environment.systemPackages = [ plymouth ];
 
     environment.etc."plymouth/plymouthd.conf".source = configFile;
@@ -93,8 +101,8 @@ in
     # XXX: Needed because we supply a different set of plugins in initrd.
     environment.etc."plymouth/plugins".source = "${plymouth}/lib/plymouth";
 
+    # To be discoverable by systemd.
     systemd.packages = [ plymouth ];
-
     systemd.services.plymouth-kexec.wantedBy = [ "kexec.target" ];
     systemd.services.plymouth-halt.wantedBy = [ "halt.target" ];
     systemd.services.plymouth-quit-wait.wantedBy = [ "multi-user.target" ];
@@ -106,15 +114,19 @@ in
     systemd.paths.systemd-ask-password-plymouth.wantedBy = ["multi-user.target"];
 
     boot.initrd.extraUtilsCommands = ''
-      copy_bin_and_libs ${pkgs.plymouth}/bin/plymouthd
-      copy_bin_and_libs ${pkgs.plymouth}/bin/plymouth
+      copy_bin_and_libs ${plymouth}/bin/plymouth
+      copy_bin_and_libs ${plymouth}/bin/plymouthd
 
       moduleName="$(sed -n 's,ModuleName *= *,,p' ${themesEnv}/share/plymouth/themes/${cfg.theme}/${cfg.theme}.plymouth)"
 
       mkdir -p $out/lib/plymouth/renderers
       # module might come from a theme
-      cp ${themesEnv}/lib/plymouth/{text,details,$moduleName}.so $out/lib/plymouth
+      cp ${themesEnv}/lib/plymouth/{text,details,label-ft,$moduleName}.so $out/lib/plymouth
       cp ${plymouth}/lib/plymouth/renderers/{drm,frame-buffer}.so $out/lib/plymouth/renderers
+
+      # copy font
+      mkdir -p $out/share/plymouth
+      cp ${cfg.font} $out/share/plymouth/label.ttf
 
       mkdir -p $out/share/plymouth/themes
       cp ${plymouth}/share/plymouth/plymouthd.defaults $out/share/plymouth
@@ -154,6 +166,7 @@ in
       ln -s $extraUtils/share/plymouth/logo.png /etc/plymouth/logo.png
       ln -s $extraUtils/share/plymouth/themes /etc/plymouth/themes
       ln -s $extraUtils/lib/plymouth /etc/plymouth/plugins
+      ln -s $extraUtils/share/plymouth/label.ttf /etc/plymouth/label.ttf
 
       plymouthd --mode=boot --pid-file=/run/plymouth/pid --attach-to-session
       plymouth show-splash
@@ -161,6 +174,9 @@ in
 
     boot.initrd.postMountCommands = ''
       plymouth update-root-fs --new-root-dir="$targetRoot"
+
+      # not needed anymore
+      rm /etc/plymouth/label.ttf
     '';
 
     # `mkBefore` to ensure that any custom prompts would be visible.

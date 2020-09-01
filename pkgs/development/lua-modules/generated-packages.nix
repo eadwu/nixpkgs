@@ -1459,6 +1459,21 @@ penlight = buildLuarocksPackage {
     license.fullName = "MIT/X11";
   };
 };
+psl = buildLuarocksPackage {
+  pname = "psl";
+  version = "0.3-0";
+
+  src = fetchurl {
+    url    = mirror://luarocks/psl-0.3-0.src.rock;
+    sha256 = "08k7zzra51b5c6j8n99zjfy2pxkz0s7zdp58y76y7s5dpsdl65y5";
+  };
+
+  meta = with stdenv.lib; {
+    homepage = "https://github.com/daurnimator/lua-psl";
+    description = "Bindings to libpsl, a C library that handles the Public Suffix List (PSL)";
+    license.fullName = "MIT";
+  };
+};
 rapidjson = buildLuarocksPackage {
   pname = "rapidjson";
   version = "0.6.1-1";
