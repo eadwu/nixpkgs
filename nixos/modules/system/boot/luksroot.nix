@@ -9,6 +9,12 @@ let
   kernelPackages = config.boot.kernelPackages;
   defaultPrio = (mkOptionDefault {}).priority;
 
+  pbkdf2-sha512 = pkgs.runCommandCC "pbkdf2-sha512" { buildInputs = [ pkgs.openssl ]; } ''
+    mkdir -p "$out/bin"
+    cc -O3 -lcrypto ${./pbkdf2-sha512.c} -o "$out/bin/pbkdf2-sha512"
+    strip -s "$out/bin/pbkdf2-sha512"
+  '';
+
   commonFunctions = ''
     die() {
         echo "$@" >&2
@@ -863,6 +869,9 @@ in
                     defaultDigest = {
                       raw = true;
                       command = "pbkdf2-sha512 $keyLength $iterations $response";
+                      deps = ''
+                        copy_bin_and_libs ${pbkdf2-sha512}/bin/pbkdf2-sha512
+                      '';
                     };
 
                     defaultChallenge = {
@@ -871,17 +880,32 @@ in
                     };
                   in
                   {
-                    digest = mkOption {
+                    digest = mkOption rec {
                       type = algoType;
                       default = defaultDigest;
+                      defaultText = ''
+                        {
+                          raw = true;
+                          command = "pbkdf2-sha512 $keyLength $iterations $response";
+                          deps = \'\'
+                            copy_bin_and_libs ''${pbkdf2-sha512}/bin/pbkdf2-sha512
+                          \'\';
+                        }
+                      '';
                       description = ''
                         Algorithm to use to generate the digest used.
                       '';
                     };
 
-                    challenge = mkOption {
+                    challenge = mkOption rec {
                       type = algoType;
                       default = defaultChallenge;
+                      defaultText = ''
+                        {
+                          raw = true;
+                          command = "openssl-wrap dgst -binary -sha512";
+                        }
+                      '';
                       description = ''
                         Algorithm to use to generate the challenge used.
                       '';
@@ -1067,14 +1091,7 @@ in
       ++ (optional (builtins.elem "xts" luks.cryptoModules) "ecb");
 
     # copy the cryptsetup binary and it's dependencies
-    boot.initrd.extraUtilsCommands = let
-      pbkdf2-sha512 = pkgs.runCommandCC "pbkdf2-sha512" { buildInputs = [ pkgs.openssl ]; } ''
-        mkdir -p "$out/bin"
-        cc -O3 -lcrypto ${./pbkdf2-sha512.c} -o "$out/bin/pbkdf2-sha512"
-        strip -s "$out/bin/pbkdf2-sha512"
-      '';
-    in
-    mkIf (!config.boot.initrd.systemd.enable) ''
+    boot.initrd.extraUtilsCommands = mkIf (!config.boot.initrd.systemd.enable) ''
       copy_bin_and_libs ${pkgs.cryptsetup}/bin/cryptsetup
       copy_bin_and_libs ${askPass}/bin/cryptsetup-askpass
       sed -i s,/bin/sh,$out/bin/sh, $out/bin/cryptsetup-askpass
@@ -1084,7 +1101,6 @@ in
         copy_bin_and_libs ${pkgs.yubikey-personalization}/bin/ykinfo
         copy_bin_and_libs ${pkgs.openssl.bin}/bin/openssl
 
-        copy_bin_and_libs ${pbkdf2-sha512}/bin/pbkdf2-sha512
         ${concatMapStringsSep "\n"
           (device: with device.yubikey.algo; digest.deps + challenge.deps)
           (filter
