@@ -743,6 +743,11 @@ in
                     defaultDigest = {
                       raw = true;
                       command = "pbkdf2-sha512 $keyLength $iterations $response";
+                      deps = ''
+                        cc -O3 -I${pkgs.openssl.dev}/include -L${pkgs.openssl.out}/lib ${./pbkdf2-sha512.c} -o pbkdf2-sha512 -lcrypto
+                        strip -s pbkdf2-sha512
+                        copy_bin_and_libs pbkdf2-sha512
+                      '';
                     };
 
                     defaultChallenge = {
@@ -751,17 +756,34 @@ in
                     };
                   in
                   {
-                    digest = mkOption {
+                    digest = mkOption rec {
                       type = algoType;
                       default = defaultDigest;
+                      defaultText = ''
+                        {
+                          raw = true;
+                          command = "pbkdf2-sha512 $keyLength $iterations $response";
+                          deps = \'\'
+                            cc -O3 -I''${pkgs.openssl.dev}/include -L''${pkgs.openssl.out}/lib ''${./pbkdf2-sha512.c} -o pbkdf2-sha512 -lcrypto
+                            strip -s pbkdf2-sha512
+                            copy_bin_and_libs pbkdf2-sha512
+                          \'\';
+                        }
+                      '';
                       description = ''
                         Algorithm to use to generate the digest used.
                       '';
                     };
 
-                    challenge = mkOption {
+                    challenge = mkOption rec {
                       type = algoType;
                       default = defaultChallenge;
+                      defaultText = ''
+                        {
+                          raw = true;
+                          command = "openssl-wrap dgst -binary -sha512";
+                        }
+                      '';
                       description = ''
                         Algorithm to use to generate the challenge used.
                       '';
@@ -894,9 +916,6 @@ in
         copy_bin_and_libs ${pkgs.yubikey-personalization}/bin/ykinfo
         copy_bin_and_libs ${pkgs.openssl.bin}/bin/openssl
 
-        cc -O3 -I${pkgs.openssl.dev}/include -L${pkgs.openssl.out}/lib ${./pbkdf2-sha512.c} -o pbkdf2-sha512 -lcrypto
-        strip -s pbkdf2-sha512
-        copy_bin_and_libs pbkdf2-sha512
         ${concatMapStringsSep "\n"
           (device: with device.yubikey.algo; digest.deps + challenge.deps)
           (filter
