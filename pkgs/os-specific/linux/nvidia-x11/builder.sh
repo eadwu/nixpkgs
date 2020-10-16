@@ -12,6 +12,13 @@ unpackFile() {
 }
 
 
+postPatch() {
+    grep -lr 'MODULE_LICENSE(".*")' | while read -r file; do
+        sed -i 's@MODULE_LICENSE(".*")@MODULE_LICENSE("GPL")@' "$file"
+    done
+}
+
+
 buildPhase() {
     if [ -n "$bin" ]; then
         # Create the module.
