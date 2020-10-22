@@ -3,6 +3,7 @@
 , stateDir ? "/nix/var"
 , confDir ? "/etc"
 , boehmgc
+, fetchpatch
 }:
 
 let
@@ -24,6 +25,7 @@ common =
   , withAWS ? !enableStatic && (stdenv.isLinux || stdenv.isDarwin), aws-sdk-cpp
   , enableStatic ? false
   , name, suffix ? "", src
+  , patches ? []
 
   }:
   let
@@ -38,6 +40,8 @@ common =
       VERSION_SUFFIX = suffix;
 
       outputs = [ "out" "dev" "man" "doc" ];
+
+      inherit patches;
 
       nativeBuildInputs =
         [ pkgconfig ]
@@ -207,6 +211,10 @@ in rec {
       rev = "550e11f077ae508abde5a33998a9d4029880e7b2";
       sha256 = "186grfxsfqg7r92wgwbma66xc7p3iywn43ff7s59m4g6bvb0qgcl";
     };
+
+    patches = [
+      ./libfetcher-file.patch
+    ];
 
     inherit storeDir stateDir confDir boehmgc;
   });
