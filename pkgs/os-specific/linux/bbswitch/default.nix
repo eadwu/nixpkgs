@@ -54,6 +54,8 @@ stdenv.mkDerivation {
     chmod +x $out/bin/discrete_vga_poweroff $out/bin/discrete_vga_poweron
   '';
 
+  dontFixup = true;
+
   meta = with stdenv.lib; {
     description = "A module for powering off hybrid GPUs";
     platforms = [ "x86_64-linux" "i686-linux" ];

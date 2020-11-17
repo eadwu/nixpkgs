@@ -8030,6 +8030,8 @@ in
 
   wireguard-tools = callPackage ../tools/networking/wireguard-tools { };
 
+  wireplumber =  callPackage ../applications/audio/wireplumber { };
+
   woff2 = callPackage ../development/web/woff2 { };
 
   woof = callPackage ../tools/misc/woof { };
@@ -14448,6 +14450,8 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
 
   libtgvoip = callPackage ../development/libraries/libtgvoip { };
 
+  libtpms = callPackage ../development/libraries/libtpms { };
+
   libtsm = callPackage ../development/libraries/libtsm { };
 
   libgeotiff = callPackage ../development/libraries/libgeotiff { };
@@ -15925,6 +15929,8 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
   svxlink = libsForQt5.callPackage ../applications/radio/svxlink { };
 
   swiftclient = python3.pkgs.callPackage ../tools/admin/swiftclient { };
+
+  swtpm = callPackage ../applications/virtualization/swtpm { };
 
   sword = callPackage ../development/libraries/sword { };
 
@@ -18232,7 +18238,11 @@ julia_15 = callPackage ../development/compilers/julia/1.5.nix {
 
     v4l2loopback = callPackage ../os-specific/linux/v4l2loopback { };
 
+    libevl = callPackage ../os-specific/linux/libevl { };
+
     lttng-modules = callPackage ../os-specific/linux/lttng-modules { };
+
+    lkrg = callPackage ../os-specific/linux/lkrg { };
 
     broadcom_sta = callPackage ../os-specific/linux/broadcom-sta { };
 
