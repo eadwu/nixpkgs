@@ -1,33 +1,38 @@
-{ mkDerivation, lib, fetchsvn, qmake, qtbase, qttools, bison, flex }:
+{ lib, mkDerivation, fetchsvn
+, flex, bison, qmake, wrapQtAppsHook
+, qtbase, qttools }:
 
 mkDerivation rec {
   pname = "QtSpim";
-  version = "722";
+  version = "734";
 
   src = fetchsvn {
     url = "https://svn.code.sf.net/p/spimsimulator/code";
     rev = version;
-    sha256 = "1hfz41ra93pdd2pri5hibl63sg9yyk12a8nhdkmgj7h9bwgqxw6b";
+    sha256 = "1c2d30xi9jvxh34pd7m5mzgp14qz0s1726gryc7ny2z6sqdjqsaa";
   };
 
   sourceRoot = "code-r${version}/QtSpim";
 
-  nativeBuildInputs = [ bison flex qmake ];
+  nativeBuildInputs = [ flex bison qmake wrapQtAppsHook ];
 
   buildInputs = [ qtbase qttools ];
 
   # Remove build artifacts from the repo
   preConfigure = ''
-    rm parser_yacc.h
-    rm parser_yacc.cpp
-    rm scanner_lex.cpp
+    sed -i \
+      -e 's@$(COPY) ''${QMAKE_FILE_PATH}/''${QMAKE_FILE_BASE}.qhc ''${QMAKE_FILE_OUT};@@g' \
+      -e 's@qcollectiongenerator@qhelpgenerator@g' \
+      QtSpim.pro
+
+    sed -i \
+      -e 's/zero_imm/is_zero_imm/g' \
+      -e 's/^int data_dir/bool data_dir/g' \
+      -e 's/^int text_dir/bool text_dir/g' \
+      -e 's/^int parse_error_occurred/bool parse_error_occurred/g' \
+      parser_yacc.cpp
 
     rm help/qtspim.qhc
-  '';
-
-  # Fix bug in a generated Makefile
-  postConfigure = ''
-    substituteInPlace Makefile --replace '$(MOVE) help/qtspim.qhc help/qtspim.qhc;' ""
   '';
 
   # Fix documentation path
