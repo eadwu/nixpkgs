@@ -3,7 +3,7 @@
 , srht, redis, celery, pyyaml, markdown }:
 
 let
-  version = "0.63.4";
+  version = "0.64.2";
 
   buildWorker = src: buildGoModule {
     inherit src version;
@@ -18,7 +18,7 @@ in buildPythonPackage rec {
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/builds.sr.ht";
     rev = version;
-    sha256 = "1w3rb685nqg2h0k3ag681svc400si9r1gy0sdim3wa2qh8glbqni";
+    sha256 = "oPG3hZv0MVJHkS/WiMEE0ElycPwm17xhyW+do7IVzOI=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;
