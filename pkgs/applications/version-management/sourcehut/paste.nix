@@ -3,12 +3,12 @@
 
 buildPythonPackage rec {
   pname = "pastesrht";
-  version = "0.11.2";
+  version = "0.12.0";
 
   src = fetchgit {
     url = "https://git.sr.ht/~sircmpwn/paste.sr.ht";
     rev = version;
-    sha256 = "15hm5165v8a7ryw6i0vlf189slw4rp22cfgzznih18pbml7d0c8s";
+    sha256 = "NUh3bB50R3OEcLT17Izw5W87D8HWymmLC79yS618FIc=";
   };
 
   nativeBuildInputs = srht.nativeBuildInputs;
