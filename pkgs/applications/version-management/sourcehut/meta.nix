@@ -1,7 +1,7 @@
 { lib, fetchgit, buildPythonPackage
 , buildGoModule
 , pgpy, srht, redis, bcrypt, qrcode, stripe, zxcvbn, alembic, pystache
-, sshpubkeys, weasyprint }:
+, sshpubkeys, weasyprint, dnspython }:
 
 let
   version = "0.53.3";
@@ -36,6 +36,7 @@ in buildPythonPackage rec {
     pystache
     sshpubkeys
     weasyprint
+    dnspython
   ];
 
   preBuild = ''
