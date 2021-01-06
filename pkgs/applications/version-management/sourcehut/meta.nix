@@ -10,7 +10,7 @@ let
     inherit src version;
     pname = "metasrht-api";
 
-    vendorSha256 = "0k7i7j604wqvzjavmcsw7g2x059jkkgrgz1qyvzlqc0y4ws59xkq";
+    vendorSha256 = "11avngd311nr6432hb4db9y1kfppkqi220mgfdpmmkzn5pm59avp";
   };
 in buildPythonPackage rec {
   pname = "metasrht";
