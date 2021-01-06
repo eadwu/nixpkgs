@@ -32,7 +32,7 @@ let
   buildAPI = src: buildGoModule {
     inherit src version;
     pname = "gitsrht-api";
-    vendorSha256 = "0d6kmsbsgj2q5nddx4w675zbsiarffj9vqplwvqk7dwz4id2wnif";
+    vendorSha256 = "0314q864xalv1646vz7n4r4bq4swn9n07ygvvj6pycz21mdnpj6i";
   };
 in buildPythonPackage rec {
   pname = "gitsrht";
