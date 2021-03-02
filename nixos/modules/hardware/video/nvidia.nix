@@ -193,14 +193,6 @@ in
         assertion = !(syncCfg.enable && offloadCfg.enable);
         message = "Only one NVIDIA PRIME solution may be used at a time.";
       }
-      {
-        assertion = !(syncCfg.enable && cfg.powerManagement.finegrained);
-        message = "Sync precludes powering down the NVIDIA GPU.";
-      }
-      {
-        assertion = cfg.powerManagement.enable -> offloadCfg.enable;
-        message = "Fine-grained power management requires offload to be enabled.";
-      }
     ];
 
     # If Optimus/PRIME is enabled, we:
