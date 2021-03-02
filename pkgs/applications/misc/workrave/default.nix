@@ -3,14 +3,14 @@
 , libICE, libSM, libXScrnSaver, libXtst, cheetah
 , gobject-introspection, glib, glibmm, gtkmm3, atk, pango, pangomm, cairo
 , cairomm , dbus, dbus-glib, gdome2, gstreamer, gst-plugins-base
-, gst-plugins-good, libsigcxx }:
+, gst-plugins-good, libsigcxx, boost, python3Packages }:
 
 stdenv.mkDerivation rec {
   pname = "workrave";
-  version = "1.10.31";
+  version = "1.10.44";
 
   src = fetchFromGitHub {
-    sha256 = "0v2mx2idaxlsyv5w66b7pknlill9j9i2gqcs3vq54gak7ix9fj1p";
+    sha256 = "sha256-A4UX6QclKT0ZNU7qP+h/Wkocj920SggJYhOS5PDBkYw=";
     rev = with lib;
       "v" + concatStringsSep "_" (splitVersion version);
     repo = "workrave";
@@ -24,6 +24,7 @@ stdenv.mkDerivation rec {
     libICE libSM libXScrnSaver libXtst cheetah
     gobject-introspection glib glibmm gtkmm3 atk pango pangomm cairo cairomm
     dbus dbus-glib gdome2 gstreamer gst-plugins-base gst-plugins-good libsigcxx
+    boost python3Packages.python python3Packages.jinja2
   ];
 
   preConfigure = "./autogen.sh";
