@@ -45,6 +45,7 @@ openlog("nixos", "", LOG_USER);
 
 # Install or update the bootloader.
 if ($action eq "switch" || $action eq "boot") {
+    system("nix-env -p /nix/var/nix/profiles/system --set $out") == 0 or exit 1;
     system("@installBootLoader@ $out") == 0 or exit 1;
 }
 
