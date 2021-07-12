@@ -50,13 +50,13 @@ vscode-utils.buildVscodeMarketplaceExtension rec {
   mktplcRef = {
     name = "cpptools";
     publisher = "ms-vscode";
-    version = "1.4.1";
+    version = "1.5.1";
   };
 
   vsix = fetchurl {
     name = "${mktplcRef.publisher}-${mktplcRef.name}.zip";
     url = "https://github.com/microsoft/vscode-cpptools/releases/download/${mktplcRef.version}/cpptools-linux.vsix";
-    sha256 = "sha256-KnoCOLGsEc7ezJjqdiwtO0/0gGAlwoTkBNCr+ytYLbc=";
+    sha256 = "sha256-IgzAjeo1Q138l2JbI7pqQnX2LQRKuo2fgY3+jCcoJLw=";
   };
 
   buildInputs = [
