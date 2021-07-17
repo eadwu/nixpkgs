@@ -8,14 +8,9 @@ in
     mktplcRef = {
       name = "vscode-wakatime";
       publisher = "WakaTime";
-      version = "4.0.9";
-      sha256 = "0sm2fr9zbk1759r52dpnz9r7xbvxladlpinlf2i0hyaa06bhp3b1";
+      version = "14.0.0";
+      sha256 = "1d5jdsvdqhpx2nf2qiv7jb3mzhx1jc2svf33yf9xjjp3bf251jbg";
     };
-
-    postPatch = ''
-      mkdir wakatime-cli
-      ln -s ${wakatime}/bin/wakatime ./wakatime-cli/wakatime-cli
-    '';
 
     meta = with lib; {
       description = ''
@@ -23,8 +18,5 @@ in
         from your programming activity
       '';
       license = licenses.bsd3;
-      maintainers = with maintainers; [
-        eadwu
-      ];
     };
   }

@@ -1,4 +1,5 @@
-{ stdenv, lib, buildEnv, writeShellScriptBin, fetchurl, vscode, unzip, jq }:
+{ stdenv, lib, buildEnv, writeShellScriptBin, fetchurl, vscode, unzip, jq
+, autoPatchelfHook, ncurses, zlib }:
 let
   buildVscodeExtension = a@{
     name,
@@ -11,6 +12,7 @@ let
     dontPatchELF ? true,
     dontStrip ? true,
     buildInputs ? [],
+    nativeBuildInputs ? [],
     ...
   }:
   stdenv.mkDerivation ((removeAttrs a [ "vscodeExtUniqueId" ]) // {
@@ -23,6 +25,8 @@ let
     installPrefix = "share/vscode/extensions/${vscodeExtUniqueId}";
 
     buildInputs = [ unzip ] ++ buildInputs;
+    nativeBuildInputs = [ autoPatchelfHook stdenv.cc.cc ncurses zlib ] ++ nativeBuildInputs;
+    autoPatchelfIgnoreMissingDeps = true;
 
     installPhase = ''
 
