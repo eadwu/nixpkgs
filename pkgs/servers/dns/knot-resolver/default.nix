@@ -115,6 +115,7 @@ wrapped-full = runCommand unwrapped.name
       # It brings lots of deps; some are useful elsewhere (e.g. cqueues).
       http
       # psl isn't in nixpkgs yet, but policy.slice_randomize_psl() seems not important.
+      psl
     ];
     preferLocalBuild = true;
     allowSubstitutes = false;

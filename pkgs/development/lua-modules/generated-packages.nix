@@ -3110,6 +3110,28 @@ buildLuarocksPackage {
   };
 }) {};
 
+psl = callPackage({ buildLuarocksPackage, luaOlder, luaAtLeast
+, fetchurl}:
+buildLuarocksPackage {
+  pname = "psl";
+  version = "0.3-0";
+  knownRockspec = (fetchurl {
+    url    = "https://raw.githubusercontent.com/rocks-moonscript-org/moonrocks-mirror/master/psl-0.3-0.rockspec";
+    sha256 = "1x7sc8n780k67v31bvqqxhh6ihy0k91zmp6xcxmkifr0gd008x9z";
+  }).outPath;
+  src = fetchurl {
+    url    = "https://github.com/daurnimator/lua-psl/archive/v0.3.zip";
+    sha256 = "17nqy0caigahjjcij685xf976a372njmi37010ypngybnfkkppi6";
+  };
+
+
+  meta = {
+    homepage = "https://github.com/daurnimator/lua-psl";
+    description = "Bindings to libpsl, a C library that handles the Public Suffix List (PSL)";
+    license.fullName = "MIT";
+  };
+}) {};
+
 rapidjson = callPackage({ buildLuarocksPackage, fetchgit, lua, luaOlder }:
 buildLuarocksPackage {
   pname = "rapidjson";

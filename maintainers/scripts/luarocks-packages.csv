@@ -110,6 +110,7 @@ nvim-nio,,,,,,mrcjkb
 pathlib.nvim,,,,,,
 penlight,https://github.com/lunarmodules/Penlight.git,,,,,alerque
 plenary.nvim,https://github.com/nvim-lua/plenary.nvim.git,,,,5.1,
+psl,,,,,,
 rapidjson,https://github.com/xpol/lua-rapidjson.git,,,,,
 rocks.nvim,,,,,5.1,teto mrcjkb
 rest.nvim,,,,,5.1,teto

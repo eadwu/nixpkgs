@@ -42,6 +42,7 @@
 , pcre
 , pkg-config
 , postgresql
+, libpsl
 , readline
 , rustPlatform
 , sol2
@@ -645,6 +646,12 @@ in
         -c "PlenaryBustedDirectory test/auto/ { minimal_init = './test/minimal_init.vim' }"
     '';
 
+  });
+
+  psl = prev.luaLib.overrideLuarocks prev.psl (drv: {
+    externalDeps = [
+      { name = "PSL"; dep = libpsl; }
+    ];
   });
 
   std-_debug = prev.std-_debug.overrideAttrs (oa: {
