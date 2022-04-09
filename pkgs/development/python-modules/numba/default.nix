@@ -24,7 +24,7 @@ let
 in buildPythonPackage rec {
   version = "0.55.1";
   pname = "numba";
-  disabled = pythonOlder "3.6" || pythonAtLeast "3.10";
+  disabled = pythonOlder "3.6" || pythonAtLeast "3.11";
 
   src = fetchPypi {
     inherit pname version;
