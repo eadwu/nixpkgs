@@ -2,25 +2,27 @@
 , fetchFromGitHub
 , buildGoModule
 , makeWrapper
+, libnvidia-container
 }:
 buildGoModule rec {
   pname = "nvidia-container-toolkit";
-  version = "1.9.0";
+  version = "1.12.0";
 
   src = fetchFromGitHub {
     owner = "NVIDIA";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-b4mybNB5FqizFTraByHk5SCsNO66JaISj18nLgLN7IA=";
+    sha256 = "sha256-Qn1bmbf6SVFqb3hogVvWr8xMrDoh9St5/gQe0gfWHl4=";
   };
 
   vendorSha256 = null;
-  ldflags = [ "-s" "-w" ];
+  ldflags = [ "-s" "-w" "-extldflags=-Wl,-z,lazy" ];
   nativeBuildInputs = [ makeWrapper ];
+  propagatedBuildInputs = [ libnvidia-container ];
 
+  # https://github.com/NVIDIA/nvidia-docker/issues/1682#issuecomment-1250952249
   postInstall = ''
-    mv $out/bin/{pkg,${pname}}
-    ln -s $out/bin/nvidia-container-{toolkit,runtime-hook}
+    ln -sf $out/bin/nvidia-container-runtime-hook $out/bin/nvidia-container-toolkit
   '';
 
   doCheck = false;

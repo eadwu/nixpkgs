@@ -4,18 +4,13 @@
 , writeShellScript
 , runCommand
 , makeWrapper
+, libnvidia-container
 , nvidia-container-toolkit
 , containerRuntimePath
 , configTemplate
 , extraCommands ? ""
 }:
 let
-  isolatedContainerRuntimePath = linkFarm "isolated_container_runtime_path" [
-    {
-      name = "runc";
-      path = containerRuntimePath;
-    }
-  ];
   warnIfXdgConfigHomeIsSet = writeShellScript "warn_if_xdg_config_home_is_set" ''
     set -eo pipefail
 
@@ -26,6 +21,7 @@ let
 in
 runCommand "nvidia-container-toolkit-wrapper" {
     nativeBuildInputs = [ makeWrapper ];
+    propagatedBuildInputs = [ libnvidia-container nvidia-container-toolkit ];
     meta.priority = -1; # scuffed
 } ''
   mkdir -p $out/etc/nvidia-container-runtime
@@ -39,18 +35,20 @@ runCommand "nvidia-container-toolkit-wrapper" {
   # podman, i.e., there's no need to have mutually exclusivity on what high
   # level runtime can enable the nvidia runtime because each high level
   # runtime has its own config.toml file.
-  makeWrapper ${nvidia-container-toolkit}/bin/nvidia-container-runtime $out/bin/nvidia-container-runtime \
-    --run "${warnIfXdgConfigHomeIsSet}" \
-    --prefix PATH : ${isolatedContainerRuntimePath} \
-    --set-default XDG_CONFIG_HOME $out/etc
+  for binary in nvidia-ctk nvidia-container-runtime nvidia-container-runtime-hook;
+  do
+    makeWrapper ${nvidia-container-toolkit}/bin/$binary $out/bin/$binary \
+      --run "${warnIfXdgConfigHomeIsSet}" \
+      --set-default XDG_CONFIG_HOME $out/etc
+  done
+  ln -sf $out/bin/nvidia-container-runtime-hook $out/bin/nvidia-container-toolkit
 
   cp ${configTemplate} $out/etc/nvidia-container-runtime/config.toml
 
   substituteInPlace $out/etc/nvidia-container-runtime/config.toml \
-    --subst-var-by glibcbin ${lib.getBin glibc}
-
-  makeWrapper ${nvidia-container-toolkit}/bin/nvidia-container-toolkit $out/bin/nvidia-container-toolkit \
-    --add-flags "-config $out/etc/nvidia-container-runtime/config.toml"
+    --subst-var-by glibcbin ${lib.getBin glibc} \
+    --subst-var-by nvidia-container-cli "${libnvidia-container}/bin/nvidia-container-cli" \
+    --subst-var-by containerRuntimePath "${containerRuntimePath}"
 
   ${extraCommands}
 ''

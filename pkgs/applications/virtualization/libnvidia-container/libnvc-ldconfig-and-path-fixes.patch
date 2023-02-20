@@ -71,10 +71,10 @@ index 33d78dd..2b087db 100644
  
  #endif /* HEADER_LDCACHE_H */
 diff --git a/src/nvc_info.c b/src/nvc_info.c
-index 30e3cfd..6d12a50 100644
+index f0c2e5a..0ee7698 100644
 --- a/src/nvc_info.c
 +++ b/src/nvc_info.c
-@@ -167,15 +167,13 @@ find_library_paths(struct error *err, struct nvc_driver_info *info, const char *
+@@ -216,15 +216,13 @@ find_library_paths(struct error *err, struct dxcore_context *dxcore, struct nvc_
          if (path_resolve_full(err, path, root, ldcache) < 0)
                  return (-1);
          ldcache_init(&ld, err, path);
@@ -91,7 +91,7 @@ index 30e3cfd..6d12a50 100644
                  goto fail;
  
          info->nlibs32 = size;
-@@ -183,13 +181,11 @@ find_library_paths(struct error *err, struct nvc_driver_info *info, const char *
+@@ -232,13 +230,11 @@ find_library_paths(struct error *err, struct dxcore_context *dxcore, struct nvc_
          if (info->libs32 == NULL)
                  goto fail;
          if (ldcache_resolve(&ld, LIB32_ARCH, root, libs,
@@ -106,7 +106,7 @@ index 30e3cfd..6d12a50 100644
          return (rv);
  }
  
-@@ -203,7 +199,7 @@ find_binary_paths(struct error *err, struct nvc_driver_info *info, const char *r
+@@ -252,7 +248,7 @@ find_binary_paths(struct error *err, struct dxcore_context* dxcore, struct nvc_d
          char path[PATH_MAX];
          int rv = -1;
  
@@ -116,14 +116,14 @@ index 30e3cfd..6d12a50 100644
                  return (-1);
          }
 diff --git a/src/nvc_ldcache.c b/src/nvc_ldcache.c
-index 6ff380f..cbe6a69 100644
+index db3b2f6..ae5def4 100644
 --- a/src/nvc_ldcache.c
 +++ b/src/nvc_ldcache.c
-@@ -340,7 +340,7 @@ nvc_ldcache_update(struct nvc_context *ctx, const struct nvc_container *cnt)
+@@ -367,7 +367,7 @@ nvc_ldcache_update(struct nvc_context *ctx, const struct nvc_container *cnt)
          if (validate_args(ctx, cnt != NULL) < 0)
                  return (-1);
  
--        argv = (char * []){cnt->cfg.ldconfig, cnt->cfg.libs_dir, cnt->cfg.libs32_dir, NULL};
+-        argv = (char * []){cnt->cfg.ldconfig, "-f", "/etc/ld.so.conf", "-C", "/etc/ld.so.cache", cnt->cfg.libs_dir, cnt->cfg.libs32_dir, NULL};
 +        argv = (char * []){cnt->cfg.ldconfig, "-f", "/tmp/ld.so.conf.nvidia-host", "-C", "/tmp/ld.so.cache.nvidia-host", cnt->cfg.libs_dir, cnt->cfg.libs32_dir, NULL};
          if (*argv[0] == '@') {
                  /*
