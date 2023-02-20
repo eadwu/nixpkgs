@@ -24196,6 +24196,12 @@ with pkgs;
     additionalPaths = [ (callPackage ../applications/virtualization/nvidia-docker { }) ];
   };
 
+  nvidia-k3s = mkNvidiaContainerPkg {
+    name = "nvidia-k3s";
+    containerRuntimePath = "${k3s.containerd}/bin/containerd";
+    configTemplate = ../applications/networking/cluster/k3s/config.toml;
+  };
+
   nvidia-podman = mkNvidiaContainerPkg {
     name = "nvidia-podman";
     containerRuntimePath = "${runc}/bin/runc";

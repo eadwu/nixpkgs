@@ -150,6 +150,7 @@ let
   };
   # Grab this separately from a build because it's used by both stages of the
   # k3s build.
+  repoPatches = [ ./6994.patch ];
   k3sRepo = fetchgit {
     url = "https://github.com/k3s-io/k3s";
     rev = "v${k3sVersion}";
@@ -183,6 +184,8 @@ let
 
     src = k3sRepo;
     vendorSha256 = k3sVendorSha256;
+
+    patches = repoPatches;
 
     nativeBuildInputs = [ pkg-config ];
     buildInputs = [ libseccomp sqlite.dev ];
@@ -239,6 +242,8 @@ buildGoModule rec {
   tags = [ "libsqlite3" "linux" "ctrd" ];
   src = k3sRepo;
   vendorSha256 = k3sVendorSha256;
+
+  patches = repoPatches;
 
   postPatch = ''
     # Nix prefers dynamically linked binaries over static binary.
@@ -338,6 +343,9 @@ buildGoModule rec {
   installCheckPhase = ''
     $out/bin/k3s --version | grep -F "v${k3sVersion}" >/dev/null
   '';
+
+  passthru.server = k3sServer;
+  passthru.containerd = k3sContainerd;
 
   passthru.updateScript = updateScript;
 
