@@ -2,30 +2,28 @@
 , fetchFromGitHub
 , buildGoModule
 , makeWrapper
-, nvidia-container-runtime
 }:
 buildGoModule rec {
   pname = "nvidia-container-toolkit";
-  version = "1.5.0";
+  version = "1.9.0";
 
   src = fetchFromGitHub {
     owner = "NVIDIA";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-YvwqnwYOrlSE6PmNNZ5xjEaEcXdHKcakIwua+tOvIJ0=";
+    sha256 = "sha256-b4mybNB5FqizFTraByHk5SCsNO66JaISj18nLgLN7IA=";
   };
 
-  vendorSha256 = "17zpiyvf22skfcisflsp6pn56y6a793jcx89kw976fq2x5br1bz7";
+  vendorSha256 = null;
   ldflags = [ "-s" "-w" ];
   nativeBuildInputs = [ makeWrapper ];
 
   postInstall = ''
     mv $out/bin/{pkg,${pname}}
     ln -s $out/bin/nvidia-container-{toolkit,runtime-hook}
-
-    wrapProgram $out/bin/nvidia-container-toolkit \
-      --add-flags "-config ${nvidia-container-runtime}/etc/nvidia-container-runtime/config.toml"
   '';
+
+  doCheck = false;
 
   meta = with lib; {
     homepage = "https://github.com/NVIDIA/nvidia-container-toolkit";

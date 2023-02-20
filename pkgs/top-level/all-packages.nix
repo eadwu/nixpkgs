@@ -24172,19 +24172,20 @@ with pkgs;
   nv-codec-headers-11 = callPackage ../development/libraries/nv-codec-headers/11_x.nix { };
   nv-codec-headers-12 = callPackage ../development/libraries/nv-codec-headers/12_x.nix { };
 
-  mkNvidiaContainerPkg = { name, containerRuntimePath, configTemplate, additionalPaths ? [] }:
+  libnvidia-container = callPackage ../applications/virtualization/libnvidia-container { };
+  nvidia-container-toolkit = callPackage ../applications/virtualization/nvidia-container-toolkit { };
+
+  mkNvidiaContainerPkg = { name, containerRuntimePath, configTemplate, additionalPaths ? [], extraCommands ? "" }:
     let
-      nvidia-container-runtime = callPackage ../applications/virtualization/nvidia-container-runtime {
-        inherit containerRuntimePath configTemplate;
+      nvidia-container-toolkit-wrapped = callPackage ../applications/virtualization/nvidia-container-toolkit/wrapper.nix {
+        inherit containerRuntimePath configTemplate extraCommands;
       };
     in symlinkJoin {
       inherit name;
       paths = [
-        (callPackage ../applications/virtualization/libnvidia-container { })
-        nvidia-container-runtime
-        (callPackage ../applications/virtualization/nvidia-container-toolkit {
-          inherit nvidia-container-runtime;
-        })
+        nvidia-container-toolkit-wrapped
+        nvidia-container-toolkit
+        libnvidia-container
       ] ++ additionalPaths;
     };
 
