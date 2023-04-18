@@ -843,7 +843,7 @@ in
                         command = mkOption {
                           type = types.str;
                           default = "";
-                          description = ''
+                          description = lib.mdDoc ''
                             Command used to generate the secrets.
                           '';
                         };
@@ -851,7 +851,7 @@ in
                         deps = mkOption {
                           type = types.lines;
                           default = "";
-                          description = ''
+                          description = lib.mdDoc ''
                             Dependencies to insert into initrd that are needed for the algorithm.
                           '';
                         };
@@ -859,7 +859,7 @@ in
                         raw = mkOption {
                           type = types.bool;
                           default = false;
-                          description = ''
+                          description = lib.mdDoc ''
                             Whether or not the output from the command is outputted as raw bytes.
                           '';
                         };
@@ -892,7 +892,7 @@ in
                           \'\';
                         }
                       '';
-                      description = ''
+                      description = lib.mdDoc ''
                         Algorithm to use to generate the digest used.
                       '';
                     };
@@ -906,7 +906,7 @@ in
                           command = "openssl-wrap dgst -binary -sha512";
                         }
                       '';
-                      description = ''
+                      description = lib.mdDoc ''
                         Algorithm to use to generate the challenge used.
                       '';
                     };
