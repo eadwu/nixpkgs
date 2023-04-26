@@ -43,6 +43,14 @@ in
            :::
         '';
       };
+
+      extraOptions = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        description = lib.mdDoc ''
+          ...
+        '';
+      };
     };
   };
 
@@ -53,14 +61,14 @@ in
         what = "tmpfs";
         where = "/tmp";
         type = "tmpfs";
-        mountConfig.Options = concatStringsSep "," [
+        mountConfig.Options = concatStringsSep "," ([
           "mode=1777"
           "strictatime"
           "rw"
           "nosuid"
           "nodev"
           "size=${toString cfg.tmpfsSize}"
-        ];
+        ] ++ cfg.extraOptions);
       }
     ];
 
