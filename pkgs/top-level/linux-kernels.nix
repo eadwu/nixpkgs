@@ -149,6 +149,14 @@ in {
       ];
     };
 
+    linux_wsl_5_15 = callPackage ../os-specific/linux/kernel/wsl.nix {
+      version = "5.15.146";
+      kernelPatches = [
+        kernelPatches.bridge_stp_helper
+        kernelPatches.request_key_helper
+      ];
+    };
+
     linux_6_1 = callPackage ../os-specific/linux/kernel/mainline.nix {
       branch = "6.1";
       kernelPatches = [
@@ -636,6 +644,10 @@ in {
     linux_6_9 = throw "linux 6.9 was removed because it reached its end of life upstream"; # Added 2024-08-02
   };
 
+  wslPackages = {
+    linux_wsl_5_15 = recurseIntoAttrs (packagesFor kernels.linux_wsl_5_15);
+  };
+
   rtPackages = {
      # realtime kernel packages
      linux_rt_5_4 = packagesFor kernels.linux_rt_5_4;
@@ -652,7 +664,7 @@ in {
     linux_rpi4 = packagesFor kernels.linux_rpi4;
   };
 
-  packages = recurseIntoAttrs (vanillaPackages // rtPackages // rpiPackages // {
+  packages = recurseIntoAttrs (vanillaPackages // rtPackages // rpiPackages // wslPackages // {
 
     # Intentionally lacks recurseIntoAttrs, as -rc kernels will quite likely break out-of-tree modules and cause failed Hydra builds.
     linux_testing = packagesFor kernels.linux_testing;
