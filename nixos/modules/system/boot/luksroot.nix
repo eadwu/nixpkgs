@@ -156,10 +156,10 @@ let
   in ''
     # Wait for luksRoot (and optionally keyFile and/or header) to appear, e.g.
     # if on a USB drive.
-    wait_target "device" ${dev.device} || ${missingCmd} "${dev.device} is unavailable"
+    wait_target "device" ${dev.device} ${toString dev.gracePeriod} || ${missingCmd} "${dev.device} is unavailable"
 
     ${optionalString (dev.header != null) ''
-      wait_target "header" ${dev.header} || ${missingCmd} "${dev.header} is unavailable"
+      wait_target "header" ${dev.header} ${toString dev.gracePeriod} || ${missingCmd} "${dev.header} is unavailable"
     ''}
 
     try_empty_passphrase() {
@@ -230,7 +230,7 @@ let
     # LUKS
     open_normally() {
         ${if (dev.keyFile != null) then ''
-        if wait_target "key file" ${dev.keyFile}; then
+        if wait_target "key file" ${dev.keyFile} ${toString dev.gracePeriod}; then
             ${csopen} --key-file=${dev.keyFile} \
               ${optionalString (dev.keyFileSize != null) "--keyfile-size=${toString dev.keyFileSize}"} \
               ${optionalString (dev.keyFileOffset != null) "--keyfile-offset=${toString dev.keyFileOffset}"}
@@ -668,6 +668,14 @@ in
             description = ''
               If keyFile fails then try an empty passphrase first before
               prompting for password.
+            '';
+          };
+
+          gracePeriod = mkOption {
+            default = 10;
+            type = types.int;
+            description = lib.mdDoc ''
+              The amount of time in seconds to wait for the device to appear.
             '';
           };
 
