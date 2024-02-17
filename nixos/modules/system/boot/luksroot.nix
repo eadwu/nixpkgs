@@ -151,13 +151,15 @@ let
            + optionalString (dev.header != null) " --header=${dev.header}";
     cschange = "cryptsetup luksChangeKey ${dev.device} ${optionalString (dev.header != null) "--header=${dev.header}"}";
     fido2luksCredentials = dev.fido2.credentials ++ optional (dev.fido2.credential != null) dev.fido2.credential;
+    missingCmd = if dev.dieOnMissing then "die" else "echo";
+    fallbackToPasswordCmd = if dev.fallbackToPassword then "echo" else "die";
   in ''
     # Wait for luksRoot (and optionally keyFile and/or header) to appear, e.g.
     # if on a USB drive.
-    wait_target "device" ${dev.device} || die "${dev.device} is unavailable"
+    wait_target "device" ${dev.device} || ${missingCmd} "${dev.device} is unavailable"
 
     ${optionalString (dev.header != null) ''
-      wait_target "header" ${dev.header} || die "${dev.header} is unavailable"
+      wait_target "header" ${dev.header} || ${missingCmd} "${dev.header} is unavailable"
     ''}
 
     try_empty_passphrase() {
@@ -236,7 +238,7 @@ let
             if [ $cs_status -ne 0 ]; then
               echo "Key File ${dev.keyFile} failed!"
               if ! try_empty_passphrase; then
-                ${if dev.fallbackToPassword then "echo" else "die"} "${dev.keyFile} is unavailable"
+                ${fallbackToPasswordCmd} "${dev.keyFile} is unavailable"
                 echo " - failing back to interactive password prompt"
                 do_open_passphrase
               fi
@@ -244,7 +246,7 @@ let
         else
             # If the key file never shows up we should also try the empty passphrase
             if ! try_empty_passphrase; then
-               ${if dev.fallbackToPassword then "echo" else "die"} "${dev.keyFile} is unavailable"
+               ${fallbackToPasswordCmd} "${dev.keyFile} is unavailable"
                echo " - failing back to interactive password prompt"
                do_open_passphrase
             fi
@@ -482,17 +484,36 @@ let
     }
     ''}
 
-    # commands to run right before we mount our device
-    ${dev.preOpenCommands}
+    luksroot_can_open() {
+      ${optionalString (dev.header != null) ''
+      if ! dev_exist ${dev.header}; then
+        return 1
+      fi
+      ''}
+      if dev_exist ${dev.device}; then
+        return 0
+      fi
+      return 1
+    }
 
-    ${if (luks.yubikeySupport && (dev.yubikey != null)) || (luks.gpgSupport && (dev.gpgCard != null)) || (luks.fido2Support && fido2luksCredentials != []) then ''
-    open_with_hardware
-    '' else ''
-    open_normally
-    ''}
+    if luksroot_can_open; then
+      # commands to run right before we mount our device
+      ${dev.preOpenCommands}
 
-    # commands to run right after we mounted our device
-    ${dev.postOpenCommands}
+      ${if (luks.yubikeySupport && (dev.yubikey != null)) || (luks.gpgSupport && (dev.gpgCard != null)) || (luks.fido2Support && fido2luksCredentials != []) then ''
+      open_with_hardware
+      '' else ''
+      open_normally
+      ''}
+
+      # commands to run right after we mounted our device
+      ${dev.postOpenCommands}
+    else
+      echo "skipping unavailable ${dev.device}"
+      ${optionalString (dev.header != null) ''
+      echo "skipping unavailable ${dev.header}"
+      ''}
+    fi
   '';
 
   askPass = pkgs.writeScriptBin "cryptsetup-askpass" ''
@@ -723,6 +744,14 @@ in
               Whether to fallback to interactive passphrase prompt if the keyfile
               cannot be found. This will prevent unattended boot should the keyfile
               go missing.
+            '';
+          };
+
+          dieOnMissing = mkOption {
+            default = true;
+            type = types.bool;
+            description = lib.mdDoc ''
+              Whether to ignore missing disks if they do not exist.
             '';
           };
 
