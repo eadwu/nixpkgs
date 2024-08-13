@@ -60,7 +60,10 @@ in rec {
   mkPathSafeName = replaceStrings ["@" ":" "\\" "[" "]"] ["-" "-" "-" "" ""];
 
   # a type for options that take a unit name
-  unitNameType = types.strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)";
+  unitNameType = with types; oneOf [
+    strMatching ""
+    strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)"
+  ];
 
   makeUnit = name: unit:
     if unit.enable then
