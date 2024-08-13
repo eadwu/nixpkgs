@@ -61,8 +61,8 @@ in rec {
 
   # a type for options that take a unit name
   unitNameType = with types; oneOf [
-    strMatching ""
-    strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)"
+    (strMatching "")
+    (strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)")
   ];
 
   makeUnit = name: unit:
