@@ -67,7 +67,7 @@ let
   };
 
   extensionsFlag = ''
-    --add-flags "--extensions-dir ${combinedExtensionsDrv}/share/vscode/extensions"
+    --append-flags "--extensions-dir ${combinedExtensionsDrv}/share/vscode/extensions"
   '';
 in
 
