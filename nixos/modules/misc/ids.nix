@@ -334,7 +334,7 @@ in
       cassandra = 300;
       qemu-libvirtd = 301;
       # kvm = 302; # unused
-      # render = 303; # unused
+      render = 303;
       # zeronet = 304; # removed 2019-01-03
       lirc = 305;
       lidarr = 306;
